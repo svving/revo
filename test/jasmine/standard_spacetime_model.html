@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!-- David Timber's FOR SALE Licence
+This file is part of the project that is licensed with
+"David Timber's FOR SALE Licence". See 'LICENCE' file for more info.
+(c) 2018 David Timber. All rights reserved.
+-->
+<html>
+<head>
+  <meta charset="utf-8" />
+
+  <link rel="stylesheet" href="../../import/jasmine/jasmine.css" />
+
+  <script type="application/javascript" src="../../import/jasmine/jasmine.js"></script>
+  <script type="application/javascript" src="../../import/jasmine/jasmine-html.js"></script>
+  <script type="application/javascript" src="../../import/jasmine/boot.js"></script>
+
+  <script type="application/javascript" src="../../import/gl-matrix-min.js"></script>
+
+  <script type="application/javascript" src="../../engine/global.js"></script>
+  <script type="application/javascript" src="../../engine/spacetime.js"></script>
+  <script type="application/javascript" src="../../engine/basic_spacetime_model.js"></script>
+
+  <script type="application/javascript">
+  (function () {
+    "use strict";
+
+    describe("Standard Spacetime Model", function () {
+      describe("Basic Model", function () {
+        var model, ps;
+        var spt = 1 / 20, loopStart, ticks;
+
+        ps = new revo.util.PerfStopwatch();
+
+        beforeAll(function () {
+          ps.push();
+          model = revo.BasicSpacetimeModel.buildRandomSystem();
+          ps.push(true, "building");
+        });
+
+        it("A random basic system should be able to run for a considerable amount of time", function () {
+          expect(function () {
+            loopStart = performance.now();
+            ticks = 0;
+
+            do {
+              model.advance(spt);
+              ticks += 1;
+            } while (performance.now() - loopStart < 10000);
+            console.log("Ticks: " + ticks);
+          }).not.toThrow();
+
+        }, 11000);
+      });
+    });
+
+
+  })();
+  </script>
+
+</head>
+<body>
+</body>
+</html>
