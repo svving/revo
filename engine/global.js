@@ -7,7 +7,9 @@ This file is part of the project that is licensed with
 
 // eslint-disable-next-line no-unused-vars
 var revo = (function () {
-  var ret = {
+  var ret;
+
+  ret = {
     util: {
       throwFrozen: function (x) { throw Object.freeze(x); },
       emptyFunc: function () {},
@@ -62,6 +64,45 @@ var revo = (function () {
         }
       }
     },
+    glu: {
+      arrError: function (gl) {
+        let err, ret = [];
+
+        while (true) {
+          err = gl.getError();
+          if (err !== gl.NO_ERROR) {
+            ret.push(err);
+          }
+          else {
+            break;
+          }
+        }
+
+        return ret;
+      },
+      dropError: function (gl) {
+        let error = revo.util.arrGLError(gl);
+
+        if (error.length) {
+          let e = new revo.error.gl();
+          e
+            .set(gl, error)
+            .raise();
+        }
+      },
+      clearError: function (gl) {
+        while (gl.getError() !== gl.NO_ERROR);
+      },
+      setNPOT: function (gl) {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      },
+      noError: function (gl) {
+        return gl.NO_ERROR === gl.getError();
+      }
+    },
     math: {
       clamp: (n, min, max) => Math.min(Math.max(n, min), max)
     },
@@ -98,6 +139,43 @@ var revo = (function () {
         pc: (x) => x / 3.0857 * 10000000000000000,
         ly: (x) => x / 9.4607 * 1000000000000000,
         au: (x) => x / 149597870700
+      }
+    },
+    const: {
+      C: 299792458,
+      G: 6.67408 / 100000000000
+    },
+    ui: {},
+    RevoError: class RevoError extends Error {
+      raise (frozen) {
+        if (frozen === undefined) {
+          frozen = true;
+        }
+
+        if (frozen) {
+          Object.freeze(this);
+        }
+        throw this;
+      }
+    }
+  };
+  ret.error = {
+    avail: class AvailabilityError extends ret.RevoError {},
+    state: class StateError extends ret.RevoError {},
+    gl: class GLError extends ret.RevoError {
+      constructor (msg, a, b) {
+        super(msg, a, b);
+
+        Object.defineProperties(this, {
+          set: {
+            value: function (gl, error) {
+              this.gl = gl;
+              this.error = error;
+              return this;
+            },
+            configurable: true
+          }
+        });
       }
     }
   };

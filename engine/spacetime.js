@@ -172,12 +172,12 @@ This file is part of the project that is licensed with
                   }
                 }
 
-                // TODO: before applying delta, do path collision detection
-
                 for (bodyI of __idBodyMap) {
                   bodyI[1].be(t);
                 }
 
+                // TODO: make k-d tree of small bodies
+                // TODO: do path collision detection using pos and ppos (small bodies)
                 cdStart: do {
                   for (bodyI of __idBodyMap) {
                     for (bodyJ of __idBodyMap) {
@@ -229,6 +229,7 @@ This file is part of the project that is licensed with
           this.mass = 0;
           this.radius = 0;
           this.pos = vec3.create();
+          this.ppos = vec3.create();
 
           // The object's position delta used for gravitation
           this.delta = vec3.create();
@@ -244,7 +245,7 @@ This file is part of the project that is licensed with
         }
 
         gravitate (body) {
-          let d, v, f;
+          let d, v;
 
           d = vec3.distance(this.pos, body.pos);
 
@@ -252,9 +253,8 @@ This file is part of the project that is licensed with
           vec3.sub(v, body.pos, this.pos);
           vec3.normalize(v, v);
 
-          f = body.mass / (d * d);
-          vec3.scale(v, v, f);
-
+          // delta(acceleration) = G * m / d * d
+          vec3.scale(v, v, revo.const.G * body.mass / (d * d));
           vec3.add(this.delta, this.delta, v);
 
           return this;
@@ -292,17 +292,22 @@ This file is part of the project that is licensed with
         }
         be (t) {
           let at = [0, 0, 0];
-          let v = [0, 0, 0];
+          let dt = [0, 0, 0];
+          let d = [0, 0, 0];
 
-          vec3.scale(this.delta, this.delta, t);
-          vec3.add(this.vel, this.vel, this.delta);
-          vec3.set(this.delta, 0, 0, 0);
+          vec3.copy(this.ppos, this.pos);
 
-          vec3.scale(at, this.accel, t);
+          // Momentum
+          vec3.scale(d, this.vel, t);
+          vec3.add(this.pos, this.pos, d);
+          // Force
+          vec3.add(this.delta, this.delta, this.accel);
+          vec3.scale(d, this.delta, t * t / 2);
+          vec3.add(this.pos, this.pos, d);
+          // Accumulate velocity
+          vec3.scale(dt, this.delta, t);
           vec3.add(this.vel, this.vel, at);
-
-          vec3.scale(v, this.vel, t);
-          vec3.add(this.pos, this.pos, v);
+          vec3.set(this.delta, 0, 0, 0);
 
           return this;
         }

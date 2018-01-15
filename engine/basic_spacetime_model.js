@@ -53,7 +53,7 @@ This file is part of the project that is licensed with
               nb_obj: {
                 DARK: 0,
                 SMALL: 1000,
-                LARGE: 100
+                LARGE: 40
               },
               total_mass: {
                 DARK: 0,
