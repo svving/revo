@@ -279,34 +279,38 @@ This file is part of the project that is licensed with
           vec3.add(mv, pa, pb);
 
           vec3.sub(d, body.vel, this.vel);
-          vec3.scale(this.vel, d, cr * body.mass);
-          vec3.add(this.vel, this.vel, mv);
-          vec3.scale(this.vel, this.vel, tmi);
+          vec3.scale(pa, d, cr * body.mass);
+          vec3.add(pa, pa, mv);
+          vec3.scale(pa, pa, tmi);
 
           vec3.sub(d, this.vel, body.vel);
-          vec3.scale(body.vel, d, cr * this.mass);
-          vec3.add(body.vel, body.vel, mv);
-          vec3.scale(body.vel, body.vel, tmi);
+          vec3.scale(pb, d, cr * this.mass);
+          vec3.add(pb, pb, mv);
+          vec3.scale(pb, pb, tmi);
+
+          vec3.copy(this.vel, pa);
+          vec3.copy(body.vel, pb);
 
           return this;
         }
         be (t) {
           let at = [0, 0, 0];
           let dt = [0, 0, 0];
-          let d = [0, 0, 0];
+          let vt = [0, 0, 0];
 
           vec3.copy(this.ppos, this.pos);
 
           // Momentum
-          vec3.scale(d, this.vel, t);
-          vec3.add(this.pos, this.pos, d);
+          vec3.scale(vt, this.vel, t);
+          vec3.add(this.pos, this.pos, vt);
           // Force
           vec3.add(this.delta, this.delta, this.accel);
-          vec3.scale(d, this.delta, t * t / 2);
-          vec3.add(this.pos, this.pos, d);
+          vec3.scale(at, this.delta, t * t / 2);
+          vec3.add(this.pos, this.pos, at);
           // Accumulate velocity
           vec3.scale(dt, this.delta, t);
-          vec3.add(this.vel, this.vel, at);
+          vec3.add(this.vel, this.vel, dt);
+          
           vec3.set(this.delta, 0, 0, 0);
 
           return this;
