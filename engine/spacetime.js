@@ -310,7 +310,7 @@ This file is part of the project that is licensed with
           // Accumulate velocity
           vec3.scale(dt, this.delta, t);
           vec3.add(this.vel, this.vel, dt);
-          
+
           vec3.set(this.delta, 0, 0, 0);
 
           return this;
